@@ -8,8 +8,6 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-  
-    #not comming from routed link w/params
     if (params[:redirected].nil? and params[:ratings].nil? and params[:sort].nil?)
       #No updates; redirect and restore vals
       redirect_to movies_path({redirected: true, sort: session[:sort], ratings: session[:ratings]})
