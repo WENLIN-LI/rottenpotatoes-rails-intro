@@ -8,25 +8,30 @@ class MoviesController < ApplicationController
 
   def index
     
-    @all_ratings = Movie.all_ratings
-    
-    if (params[:redirected].nil? and params[:ratings].nil? and params[:sort].nil?)
-      #No updates; redirect and restore vals
-      redirect_to movies_path({redirected: true, sort: session[:sort], ratings: session[:ratings]})
-    else
-      session[:ratings] = params[:ratings]
-      session[:sort] = params[:sort].nil? ? session[:sort] : params[:sort]
+    sort = params[:sort] || session[:sort]
+    case sort
+    when 'title'
+      ordering            = {:title => :asc}
+      @title_header       = 'hilite'
+    when 'release_date'
+      ordering            = {:release_date => :asc}
+      @date_header        = 'hilite'
     end
     
-    @ratings_to_show = session[:ratings].nil? ? [] : session[:ratings].keys
-    @ratings_hash = Hash[@ratings_to_show.map {|x| [x, 1]}]
-    @sort = session[:sort]
+    @all_ratings          = Movie.all_ratings
+    @ratings_to_show     = params[:ratings] || session[:ratings] || {}
     
-    if @sort.nil?
-      @movies = Movie.with_ratings(@ratings_to_show)
-    else
-      @movies = Movie.order(@sort).with_ratings(@ratings_to_show)
+    if @ratings_to_show == {}
+      @ratings_to_show   = Hash[@all_ratings.map {|rating| [rating, rating]}]
     end
+    
+    if params[:sort] != session[:sort] or params[:ratings] != session[:ratings]
+      session[:sort]      = sort
+      session[:ratings]   = @ratings_to_show
+      redirect_to :sort => sort, :ratings => @ratings_to_show and return
+    end
+    
+    @movies = Movie.order(ordering).where(rating: @ratings_to_show.keys)
   end
    
   
