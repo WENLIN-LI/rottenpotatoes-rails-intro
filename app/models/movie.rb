@@ -1,6 +1,6 @@
 class Movie < ActiveRecord::Base
   def self.all_ratings
-    %w(G PG PG-13 NC-17 R)  
+    ["G", "PG", "PG-13", "NC-17", "R"]  
   end
   def Movie.with_ratings(ratings_list)
     if ratings_list.nil? or ratings_list.empty?
